@@ -1,0 +1,78 @@
+# КОСТЯНТИН ЛЕМЕШОК, ДЗ № 3 ДО КУРСУ PYTHON CORE
+
+# Завдання 3
+
+# У вашій компанії ведеться активна маркетингова кампанія за допомогою SMS-розсилок. Для цього ви збираєте телефонні номери клієнтів із бази даних, але часто стикаєтеся з тим, що номери записані у різних форматах. Наприклад:
+
+# "    +38(050)123-32-34"
+# "     0503451234"
+# "(050)8889900"
+# "38050-111-22-22"
+# "38050 111 22 11   "
+
+# Ваш сервіс розсилок може ефективно відправляти повідомлення лише тоді, коли номери телефонів представлені у коректному форматі. Тому вам необхідна функція, яка автоматично нормалізує номери телефонів до потрібного формату, видаляючи всі зайві символи та додаючи міжнародний код країни, якщо потрібно.
+
+# Розробіть функцію normalize_phone(phone_number), що нормалізує телефонні номери до стандартного формату, залишаючи тільки цифри та символ '+' на початку. Функція приймає один аргумент - рядок з телефонним номером у будь-якому форматі та перетворює його на стандартний формат, залишаючи тільки цифри та символ '+'. Якщо номер не містить міжнародного коду, функція автоматично додає код '+38' (для України). Це гарантує, що всі номери будуть придатними для відправлення SMS.
+
+
+# Вимоги до завдання:
+
+#     Параметр функції phone_number - це рядок з телефонним номером у різноманітних форматах.
+#     Функція видаляє всі символи, крім цифр та символу '+'.
+#     Якщо міжнародний код відсутній, функція додає код '+38'. Це враховує випадки, коли номер починається з '380' (додається лише '+') та коли номер починається без коду (додається '+38').
+#     Функція повертає нормалізований телефонний номер у вигляді рядка.
+
+
+# Рекомендації для виконання:
+
+#     Використовуйте модуль re для регулярних виразів для видалення непотрібних символів.
+#     Перевірте, чи номер починається з '+', і виправте префікс згідно з вказівками.
+#     Видаліть всі символи, крім цифр та '+', з номера телефону.
+#     На забувайте повертати нормалізований номер телефону з функції.
+
+
+# Критерії оцінювання:
+
+#     Коректність роботи функції: функція має правильно обробляти різні формати номерів, враховуючи наявність або відсутність міжнародного коду.
+#     Читабельність коду: код має бути чистим, добре організованим і добре документованим.
+#     Правильне використання регулярних виразів для видалення зайвих символів та форматування номера.
+
+import re
+import logging
+
+# Configure logging to show only the message
+logging.basicConfig(format="%(message)s", level=logging.ERROR, force=True)
+
+def normalize_phone(phone_number: str) -> str | None:
+    """
+    Normalizes a phone number to a standard format suitable for SMS sending.
+
+    Rules:
+    - Keep only digits and the '+' symbol at the beginning.
+    - If the phone number lacks an international code, add '+38' (Ukraine).
+    - If the number starts with '380', replace it with '+380'.
+    
+    :param phone_number: Phone number in any format
+    :return: Normalized phone number as a string, or None if input is invalid
+    """
+    if not isinstance(phone_number, str):
+        logging.error(f"Input must be a string. Your input is {phone_number}, which is {type(phone_number)}")
+        return None
+
+    phone_number = phone_number.strip()  # remove leading/trailing spaces
+
+    # Extract all digits
+    digits_only = re.sub(r'\D', '', phone_number)
+
+    if not digits_only:
+        logging.error(f"Invalid phone number '{phone_number}': contains no digits.")
+        return None
+
+    # Process leading '+'
+    if digits_only.startswith('380'):
+        normalized = '+' + digits_only
+    else:
+        # Add international code if missing
+        normalized = '+38' + digits_only
+
+    return normalized
