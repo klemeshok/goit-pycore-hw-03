@@ -37,6 +37,12 @@
 #     Читабельність коду: код має бути чистим, добре організованим і добре документованим.
 #     Правильне використання регулярних виразів для видалення зайвих символів та форматування номера.
 
+
+# !!!!!!! В код нижче ВНЕСЕНІ ВИПРАВЛЕННЯ згідно наступного коментаря ментора:
+# "В завданні не було сказано, що треба обробляти тільки українські номери. Сказано "Якщо номер не містить міжнародного коду, функція автоматично додає код '+38' ". Тобто можливі варіанти, коли номер міститись міжнародний код, і це може бути не +38".
+# ЩО БУЛО ВИПРАВЛЕНО: Збережена числова структура всіх номерів, які вже йдуть зі знаком '+' на початку.
+# При цьому ми розуміємо, що дана логіка обробки номерів є далеко неповною. Серед іншого, вона не включає коректний процесинг випадків, коли номер починається з міжнародного коду, але без знаку '+'.
+
 import re
 import logging
 
@@ -46,17 +52,15 @@ logging.basicConfig(format="%(message)s", level=logging.ERROR, force=True)
 def normalize_phone(phone_number: str) -> str | None:
     """
     Normalizes a phone number to a standard format suitable for SMS sending.
-
     Rules:
     - Keep only digits and the '+' symbol at the beginning.
     - If the phone number lacks an international code, add '+38' (Ukraine).
     - If the number starts with '380', replace it with '+380'.
-    
-    :param phone_number: Phone number in any format
-    :return: Normalized phone number as a string, or None if input is invalid
+        :param phone_number: Phone number in any format
+        :return: Normalized phone number as a string, or None if input is invalid
     """
     if not isinstance(phone_number, str):
-        logging.error(f"Input must be a string. Your input is {phone_number}, which is {type(phone_number)}")
+        logging.error(f"Input must be a string. Your input is {phone_number}, which is '{type(phone_number).__name__}'.")
         return None
 
     phone_number = phone_number.strip()  # remove leading/trailing spaces
@@ -68,11 +72,10 @@ def normalize_phone(phone_number: str) -> str | None:
         logging.error(f"Invalid phone number '{phone_number}': contains no digits.")
         return None
 
-    # Process leading '+'
-    if digits_only.startswith('380'):
-        normalized = '+' + digits_only
+    # Process international phone codes
+    if phone_number.startswith('+') or digits_only.startswith('380'):  
+        normalized = '+' + digits_only  # this covers cases with international phone numbers, as requested 
     else:
-        # Add international code if missing
-        normalized = '+38' + digits_only
+        normalized = '+38' + digits_only  # Add Ukrainian international code if missing (here we imply that all numbers that don't start with '+' sign are Ukrainian numbers)
 
     return normalized
